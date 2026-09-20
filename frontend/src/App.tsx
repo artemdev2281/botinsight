@@ -1,56 +1,38 @@
+import { Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
-import DashboardPage from './pages/DashboardPage'
+import ProjectLayout from './components/ProjectLayout'
 import BacklogPage from './pages/BacklogPage'
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu } from 'antd'
-
-const { Sider, Content, Header } = Layout
-
-const menuItems = [
-  {
-    key: '/dashboard',
-    label: 'Dashboard',
-  },
-  {
-    key: '/backlog',
-    label: 'Backlog',
-  },
-]
+import CreateProjectPage from './pages/CreateProjectPage'
+import DashboardPage from './pages/DashboardPage'
+import FallbacksPage from './pages/FallbacksPage'
+import ImportPage from './pages/ImportPage'
+import LoginPage from './pages/LoginPage'
+import ProjectsPage from './pages/ProjectsPage'
+import RegisterPage from './pages/RegisterPage'
+import RequestsPage from './pages/RequestsPage'
+import ScenariosPage from './pages/ScenariosPage'
 
 function App() {
-  const navigate = useNavigate()
-  const location = useLocation()
-
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider>
-        <Menu 
-          theme='dark'
-          items={menuItems}
-          selectedKeys={[location.pathname]}
-          onClick={(item) => navigate(item.key)}
-        />
-      </Sider>
+    <Routes>
+      <Route path="/" element={<Navigate to="/projects" replace />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/projects" element={<ProjectsPage />} />
+      <Route path="/projects/new" element={<CreateProjectPage />} />
 
-      <Layout>
-        <Header>
-          <strong style={{ color: 'white' }}>BotInsight</strong>
-        </Header>
+      <Route path="/projects/:projectId" element={<ProjectLayout />}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="requests" element={<RequestsPage />} />
+        <Route path="fallbacks" element={<FallbacksPage />} />
+        <Route path="scenarios" element={<ScenariosPage />} />
+        <Route path="import" element={<ImportPage />} />
+        <Route path="backlog" element={<BacklogPage />} />
+      </Route>
 
-        <Content>
-          <Routes>
-            <Route
-              path="/dashboard"
-              element={<DashboardPage />}
-            />
-            <Route
-              path="/backlog"
-              element={<BacklogPage />}
-            />
-          </Routes>
-        </Content>
-      </Layout>
-    </Layout>
+      <Route path="*" element={<Navigate to="/projects" replace />} />
+    </Routes>
   )
 }
 

@@ -1,4 +1,22 @@
-# React + TypeScript + Vite
+# BotInsight frontend
+
+Frontend лабораторной работы №1. Полная информация о проекте и инструкция запуска находятся в [корневом README](../README.md).
+
+```bash
+npm install
+npm run dev
+```
+
+Проверки:
+
+```bash
+npm run lint
+npm run build
+```
+
+<!-- Исходный справочный текст шаблона Vite оставлен ниже. -->
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
