@@ -1,8 +1,9 @@
 import { Card, Table, type TableColumnsType } from 'antd'
 import { useParams } from 'react-router-dom'
-import PageHeader from '../components/PageHeader'
-import { getProjectAnalytics } from '../mockData'
-import type { ScenarioStat } from '../types'
+import { fetchAnalytics, type ScenarioStat } from '../entities/analytics/model'
+import DataState from '../shared/ui/DataState'
+import PageHeader from '../shared/ui/PageHeader'
+import { useRequest } from '../shared/lib/useRequest'
 
 const columns: TableColumnsType<ScenarioStat> = [
   { title: 'Сценарий', dataIndex: 'name' },
@@ -13,15 +14,17 @@ const columns: TableColumnsType<ScenarioStat> = [
 ]
 
 function ScenariosPage() {
-  const { projectId } = useParams()
-  const { scenarios } = getProjectAnalytics(projectId)
+  const { projectId = '' } = useParams()
+  const { data, loading, error } = useRequest(() => fetchAnalytics(projectId))
 
   return (
     <section className="page">
       <PageHeader title="Сценарии" description="Показатели прохождения пользовательских сценариев." />
-      <Card>
-        <Table dataSource={scenarios} columns={columns} rowKey="id" pagination={false} scroll={{ x: 700 }} />
-      </Card>
+      <DataState loading={loading} error={error} isEmpty={!data || data.scenarios.length === 0}>
+        <Card>
+          <Table dataSource={data?.scenarios} columns={columns} rowKey="id" pagination={false} scroll={{ x: 700 }} />
+        </Card>
+      </DataState>
     </section>
   )
 }

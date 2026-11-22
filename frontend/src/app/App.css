@@ -94,3 +94,41 @@
     flex-direction: column;
   }
 }
+
+/* Состояния загрузки, ошибки и отсутствия данных */
+.state-card {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Анимация: плавное появление страниц и новых элементов */
+.page,
+.fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Анимация: подсветка только что созданной задачи в backlog */
+.new-row > td {
+  animation: highlight 2s ease-out;
+}
+
+@keyframes highlight {
+  from {
+    background: #d9f7be;
+  }
+  to {
+    background: transparent;
+  }
+}

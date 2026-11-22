@@ -1,5 +1,5 @@
 import { Card, Statistic } from 'antd'
-import type { Metric } from '../types'
+import type { Metric } from './model'
 
 type MetricCardProps = Pick<Metric, 'label' | 'value' | 'suffix'>
 

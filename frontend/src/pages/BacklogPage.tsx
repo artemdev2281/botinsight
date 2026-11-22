@@ -1,23 +1,44 @@
-import { Button, Card, Form, Input, Modal, Select, Table, Tag, type TableColumnsType } from 'antd'
+import { Button, Card, Segmented, Table, Tag, type TableColumnsType } from 'antd'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import PageHeader from '../components/PageHeader'
-import { getProjectAnalytics } from '../mockData'
-import type { BacklogItem } from '../types'
+import {
+  fetchBacklog,
+  priorityColors,
+  statuses,
+  type BacklogItem,
+  type BacklogPriority,
+  type BacklogStatus,
+} from '../entities/backlog/model'
+import CreateBacklogItemModal from '../features/create-backlog-item/CreateBacklogItemModal'
+import DataState from '../shared/ui/DataState'
+import PageHeader from '../shared/ui/PageHeader'
+import { useRequest } from '../shared/lib/useRequest'
 
-const priorityColors = { 'Высокий': 'red', 'Средний': 'orange', 'Низкий': 'blue' }
+type StatusFilter = 'Все' | BacklogStatus
 
 const columns: TableColumnsType<BacklogItem> = [
   { title: 'Название', dataIndex: 'title' },
-  { title: 'Приоритет', dataIndex: 'priority', render: (value: BacklogItem['priority']) => <Tag color={priorityColors[value]}>{value}</Tag> },
+  { title: 'Приоритет', dataIndex: 'priority', render: (value: BacklogPriority) => <Tag color={priorityColors[value]}>{value}</Tag> },
   { title: 'Статус', dataIndex: 'status' },
   { title: 'Источник', dataIndex: 'source' },
 ]
 
 function BacklogPage() {
-  const { projectId } = useParams()
-  const items = getProjectAnalytics(projectId).backlogItems
+  const { projectId = '' } = useParams()
+  const { data: items, setData: setItems, loading, error } = useRequest(() => fetchBacklog(projectId))
   const [open, setOpen] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('Все')
+  const [newItemId, setNewItemId] = useState<string | null>(null)
+
+  // Показываем все задачи или только задачи с выбранным статусом.
+  const visibleItems = (items ?? []).filter((item) => statusFilter === 'Все' || item.status === statusFilter)
+
+  // Новую задачу ставим в начало списка и запоминаем её id, чтобы подсветить строку.
+  const handleCreated = (item: BacklogItem) => {
+    setItems([item, ...(items ?? [])])
+    setNewItemId(item.id)
+    setOpen(false)
+  }
 
   return (
     <section className="page">
@@ -26,27 +47,31 @@ function BacklogPage() {
         description="Задачи на улучшение чат-бота."
         action={<Button type="primary" onClick={() => setOpen(true)}>Создать задачу</Button>}
       />
-      <Card>
-        <Table dataSource={items} columns={columns} rowKey="id" pagination={false} scroll={{ x: 700 }} />
-      </Card>
+      <Segmented<StatusFilter>
+        className="summary-row"
+        options={['Все', ...statuses]}
+        value={statusFilter}
+        onChange={setStatusFilter}
+      />
+      <DataState loading={loading} error={error} isEmpty={visibleItems.length === 0}>
+        <Card>
+          <Table
+            dataSource={visibleItems}
+            columns={columns}
+            rowKey="id"
+            pagination={false}
+            scroll={{ x: 700 }}
+            rowClassName={(item) => (item.id === newItemId ? 'new-row' : '')}
+          />
+        </Card>
+      </DataState>
 
-      <Modal
-        title="Новая задача"
+      <CreateBacklogItemModal
+        projectId={projectId}
         open={open}
-        onCancel={() => setOpen(false)}
-        footer={<Button onClick={() => setOpen(false)}>Закрыть</Button>}
-      >
-        <Form layout="vertical" disabled className="modal-form">
-          <Form.Item label="Название"><Input /></Form.Item>
-          <Form.Item label="Описание"><Input.TextArea rows={3} /></Form.Item>
-          <Form.Item label="Приоритет">
-            <Select options={['Высокий', 'Средний', 'Низкий'].map((value) => ({ value }))} />
-          </Form.Item>
-          <Form.Item label="Источник">
-            <Select options={['Fallback', 'Scenarios', 'Requests'].map((value) => ({ value }))} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        onClose={() => setOpen(false)}
+        onCreated={handleCreated}
+      />
     </section>
   )
 }

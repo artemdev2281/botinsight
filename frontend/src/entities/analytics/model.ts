@@ -1,21 +1,49 @@
-import type { Project, ProjectAnalytics } from './types'
+import { fakeRequest } from '../../shared/api/fakeRequest'
 
-export const projects: Project[] = [
-  {
-    id: '1',
-    name: 'Support Bot',
-    description: 'Помогает клиентам решать вопросы по картам, переводам и тарифам.',
-    dialogsCount: 12540,
-  },
-  {
-    id: '2',
-    name: 'Sales Bot',
-    description: 'Консультирует по продуктам, собирает лиды и помогает оформить заказ.',
-    dialogsCount: 8240,
-  },
-]
+export type Metric = {
+  key: string
+  label: string
+  value: number
+  suffix?: string
+}
 
-export const analyticsByProject: Record<string, ProjectAnalytics> = {
+export type RequestStat = {
+  id: string
+  intent: string
+  requests: number
+  confidence: number
+  fallbackRate: number
+}
+
+export type FallbackMessage = {
+  id: string
+  message: string
+  intent: string
+  confidence: number
+  scenario: string
+}
+
+export type ScenarioStat = {
+  id: string
+  name: string
+  completionRate: number
+  abandonedRate: number
+  fallbackRate: number
+  operatorRate: number
+}
+
+export type ProjectAnalytics = {
+  metrics: Metric[]
+  requests: RequestStat[]
+  fallbackMessages: FallbackMessage[]
+  scenarios: ScenarioStat[]
+}
+
+// У нового проекта ещё нет данных — экраны покажут состояние «Данных пока нет».
+const emptyAnalytics: ProjectAnalytics = { metrics: [], requests: [], fallbackMessages: [], scenarios: [] }
+
+// Демонстрационные данные (до подключения backend).
+const analyticsByProject: Record<string, ProjectAnalytics> = {
   '1': {
     metrics: [
       { key: 'dialogs', label: 'Диалоги', value: 12540 },
@@ -44,12 +72,6 @@ export const analyticsByProject: Record<string, ProjectAnalytics> = {
       { id: 's3', name: 'Перевод денег', completionRate: 74, abandonedRate: 11, fallbackRate: 9, operatorRate: 6 },
       { id: 's4', name: 'Блокировка карты', completionRate: 91, abandonedRate: 3, fallbackRate: 2, operatorRate: 4 },
     ],
-    backlogItems: [
-      { id: 'b1', title: 'Проблема сценария оплаты', description: 'Добавить обработку отмены платежа.', priority: 'Высокий', status: 'Открыта', source: 'Fallback' },
-      { id: 'b2', title: 'Ошибка регистрации', description: 'Упростить ввод телефона и кода.', priority: 'Средний', status: 'В работе', source: 'Scenarios' },
-      { id: 'b3', title: 'Уточнить статус карты', description: 'Добавить ответ для карт в доставке.', priority: 'Высокий', status: 'Открыта', source: 'Requests' },
-      { id: 'b4', title: 'Подсказки по тарифам', description: 'Обновить тексты в ветке с комиссиями.', priority: 'Низкий', status: 'Выполнена', source: 'Fallback' },
-    ],
   },
   '2': {
     metrics: [
@@ -77,15 +99,7 @@ export const analyticsByProject: Record<string, ProjectAnalytics> = {
       { id: 's3', name: 'Расчёт доставки', completionRate: 61, abandonedRate: 17, fallbackRate: 14, operatorRate: 8 },
       { id: 's4', name: 'Проверка статуса', completionRate: 86, abandonedRate: 6, fallbackRate: 3, operatorRate: 5 },
     ],
-    backlogItems: [
-      { id: 'b1', title: 'Скидка на набор товаров', description: 'Научить бота рассчитывать оптовую скидку.', priority: 'Высокий', status: 'В работе', source: 'Fallback' },
-      { id: 'b2', title: 'Интервал доставки', description: 'Добавить выбор точного времени.', priority: 'Средний', status: 'Открыта', source: 'Scenarios' },
-      { id: 'b3', title: 'Подбор комплекта', description: 'Уточнять цель покупки перед рекомендациями.', priority: 'Высокий', status: 'Открыта', source: 'Requests' },
-    ],
   },
 }
 
-export const getProject = (projectId?: string) => projects.find((project) => project.id === projectId)
-
-export const getProjectAnalytics = (projectId?: string) =>
-  (projectId && analyticsByProject[projectId]) || analyticsByProject['1']
+export const fetchAnalytics = (projectId: string) => fakeRequest(analyticsByProject[projectId] ?? emptyAnalytics)

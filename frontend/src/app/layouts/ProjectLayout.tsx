@@ -1,6 +1,6 @@
 import { Button, Layout, Menu, Typography } from 'antd'
 import { Navigate, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { getProject } from '../mockData'
+import { getProject } from '../../entities/project/model'
 
 const { Sider, Content, Header } = Layout
 const { Text, Title } = Typography
